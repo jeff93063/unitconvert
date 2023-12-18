@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript">
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function() {
+	navigator.serviceWorker
+	  .register("serviceWorker.js")
+	  .then(res => console.log("service worker registered"))
+	  .catch(err => console.log("service worker not registered", err))
+  })
+}
+
+function setCookie(name,value,days) { //https://stackoverflow.com/questions/14573223/set-cookie-and-get-cookie-with-javascript
+	var expires = "";
+	if (days) {
+		var date = new Date();
+		date.setTime(date.getTime() + (days*24*60*60*1000));
+		expires = "; expires=" + date.toUTCString();
+	}
+	document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+function getCookie(name) {
+	var nameEQ = name + "=";
+	var ca = document.cookie.split(';');
+	for(var i=0;i < ca.length;i++) {
+		var c = ca[i];
+		while (c.charAt(0)==' ') c = c.substring(1,c.length);
+		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+	}
+	return null;
+}
+function eraseCookie(name) {   
+	document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+var last = null;
+function $(id) { return document.getElementById(id); }
+var unitTypeData = [
+	{
+		"id": "length",
+		"text": "Length",
+		"defaultA": "in",
+		"defaultB": "mm"
+	},
+	{
+		"id": "temp",
+		"text": "Temperature",
+		"defaultA": "c",
+		"defaultB": "f"
+	},
+	{
+		"id": "speed",
+		"text": "Speed",
+		"defaultA": "mph",
+		"defaultB": "kph"
+	},
+	{
+		"id": "power",
+		"text": "Power",
+		"defaultA": "w",
+		"defaultB": "hp"
+	}
+];
+var unitdata = [
+	{
+		"id": "in",
+		"text": "in",
+		"type": "length",
+		"preoffset": 0,
+		"multiplier": 0.0254,
+		"postoffset": 0
+	},
+	{
+		"id": "mm",
+		"text": "mm",
+		"type": "length",
+		"preoffset": 0,
+		"multiplier": 0.001,
+		"postoffset": 0
+	},
+	{
+		"id": "m",
+		"text": "m",
+		"type": "length",
+		"preoffset": 0,
+		"multiplier": 1,
+		"postoffset": 0
+	},
+	{
+		"id": "c",
+		"text": "°C",
+		"type": "temp",
+		"preoffset": 0,
+		"multiplier": 1,
+		"postoffset": 273.15
+	},
+	{
+		"id": "f",
+		"text": "°F",
+		"type": "temp",
+		"preoffset": -32,
+		"multiplier": 5/9,
+		"postoffset": 273.15
+	},
+	{
+		"id": "k",
+		"text": "Kelvin",
+		"type": "temp",
+		"preoffset": 0,
+		"multiplier": 1,
+		"postoffset": 0
+	},
+	{
+		"id": "mph",
+		"text": "mph",
+		"type": "speed",
+		"preoffset": 0,
+		"multiplier": 0.44704,
+		"postoffset": 0
+	},
+	{
+		"id": "kph",
+		"text": "kph",
+		"type": "speed",
+		"preoffset": 0,
+		"multiplier": 0.27777777778,
+		"postoffset": 0
+	},
+	{
+		"id": "m/s",
+		"text": "m/s",
+		"type": "speed",
+		"preoffset": 0,
+		"multiplier": 1,
+		"postoffset": 0
+	},
+	{
+		"id": "w",
+		"text": "Watt",
+		"type": "power",
+		"preoffset": 0,
+		"multiplier": 1,
+		"postoffset": 0
+	},
+	{
+		"id": "hp",
+		"text": "hp",
+		"type": "power",
+		"preoffset": 0,
+		"multiplier": 745.69987,
+		"postoffset": 0
+	}
+];
+
+function calculate(element) {
+	setCookie("unitType",$("unitType").value,99);
+	setCookie("aUnit",$("aUnit").value,99);
+	setCookie("bUnit",$("bUnit").value,99);
+	if($("a").value || $("b").value){
+		//currently fires onchange a second time when it updates the other input
+		if(element){
+			last = element.id;
+		}
+		else{
+			last = "a";
+		}
+		if(last == "a"){
+			$("b").value = "";
+		}
+		else if(last == "b"){
+			$("a").value = "";
+		}
+		if(!isNaN(parseFloat($(last).value))){
+			let thisType = $("unitType").value;
+			var oldUnit = "";
+			var newUnit = "";
+			if(last == "a"){
+				//alert($("aUnit").value);
+				oldUnit = $("aUnit").value;
+				newUnit = $("bUnit").value;
+			}
+			else if(last == "b"){
+				oldUnit = $("bUnit").value;
+				newUnit = $("aUnit").value;
+			}
+			let oldUnitObject = unitdata.find(unitdata => unitdata.type === thisType && unitdata.id === oldUnit);
+			let newUnitObject = unitdata.find(unitdata => unitdata.type === thisType && unitdata.id === newUnit);
+			let normalizedValue = (parseFloat($(last).value) + oldUnitObject.preoffset) * oldUnitObject.multiplier + oldUnitObject.postoffset;
+			let convertedValue = (normalizedValue - newUnitObject.postoffset) / newUnitObject.multiplier - newUnitObject.preoffset;
+			if(last == "a"){
+				//alert(convertedValue);
+				$("b").value = matchSigFigs($(last).value,convertedValue);
+				setCookie("b",matchSigFigs($(last).value,convertedValue),99);
+			}
+			else if(last == "b"){
+				$("a").value = matchSigFigs($(last).value,convertedValue);
+				setCookie("a",matchSigFigs($(last).value,convertedValue),99);
+			}
+			//alert(document.getElementById(last).value);
+		}
+	}
+}
+//alert(matchSigFigs("17.98","01.00050"));
+function matchSigFigs(from,to) {
+	splitNum = from.split(".");
+	//alert(splitNum[0] + " | " + splitNum[1]);
+	before = parseInt(splitNum[0]).toString();
+	if(before == 0){
+		ints = 0;
+		after = parseInt(splitNum[1]).toString();
+		decimals = after.length;
+	}
+	else {
+		ints = before.length;
+		if(splitNum[1]){
+			decimals = splitNum[1].length;
+		}
+		else {
+			decimals = 0;
+		}
+	}
+	sigFigs = ints+decimals;
+	if(sigFigs < 3) sigFigs = 3;
+	// add some logic that if there's nothing after the decimal, don't include the decimal
+	// also a negative sign is counted as a sigfig
+	return parseFloat(parseFloat(to).toPrecision(sigFigs));
+}
+
+function initLists() {
+	//alert(getCookie("a"));
+	if(getCookie("a")){
+		$("a").value = getCookie("a");
+	}
+	if(getCookie("b")){
+		$("b").value = getCookie("b");
+	}
+	for (i in unitTypeData) {
+		var opt = document.createElement('option');
+		opt.value = unitTypeData[i].id;
+		opt.innerHTML = unitTypeData[i].text;
+		$("unitType").appendChild(opt);
+	}
+	if(getCookie("unitType")){
+		for(m of $("unitType").options){
+			if(getCookie("unitType") == m.value){
+				m.selected = true;
+			}
+		}
+	}
+	changeUnitType();
+	if(getCookie("aUnit")){
+		for(j of $("aUnit").options){
+			if(getCookie("aUnit") == j.value){
+				j.selected = true;
+			}
+			else{
+				j.selected = false;
+			}
+		}
+	}
+	if(getCookie("bUnit")){
+		for(k of $("bUnit").options){
+			if(getCookie("bUnit") == k.value){
+				k.selected = true;
+			}
+			else{
+				k.selected = false;
+			}
+		}
+	}
+}
+
+function changeUnitType(){
+	const filteredUnits = unitdata.filter( x => 
+		x.type === $("unitType").value
+	);
+	$("aUnit").innerHTML = "";
+	$("bUnit").innerHTML = "";
+	for (i in filteredUnits) {
+		var thisType = unitTypeData.find(x => x.id === $("unitType").value)
+		var opt = document.createElement('option');
+		opt.value = filteredUnits[i].id;
+		opt.innerHTML = filteredUnits[i].text;
+		if(thisType.defaultA == opt.value) {
+			opt.selected = true;
+		}
+		$("aUnit").appendChild(opt);
+		var opt2 = document.createElement('option');
+		opt2.value = filteredUnits[i].id;
+		opt2.innerHTML = filteredUnits[i].text;
+		if(thisType.defaultB == opt2.value) {
+			opt2.selected = true;
+		}
+		$("bUnit").appendChild(opt2);
+	}
+}
+</script>
+<style type="text/css">
+@media (prefers-color-scheme: dark) {
+	body { background-color: #606060; }
+	input { background-color: #000000; color: #ffffff; }
+	select { background-color: #000000; color: #ffffff; }
+}
+@media (prefers-color-scheme: light) {
+	body { background-color: #f0f0f0; }
+	input { background-color: #ffffff; color: #000000; }
+	select  { background-color: #ffffff; color: #000000; }
+}
+div#gridContainer {
+	display:grid;
+	gap: .5rem;
+	position:absolute;
+	margin: .5rem;
+	top:50%;
+	left:0px;
+	right:0px;
+	transform: translateY(-50%);
+}
+input { width:100%; font-family:"cascadia code", "cascadia mono", "courier new", courier, monospace; }
+select { width:100%; }
+@media (orientation: portrait) {
+	* { font-size: 8vw; }
+	div#gridContainer { grid-template-columns: 1fr 5em; grid-template-rows: auto auto auto; }
+	select#unitType { grid-column: 1/3; }
+}
+@media (orientation: landscape) {
+	* { font-size: 4vw; }
+	div#gridContainer { grid-template-columns: 2fr 3fr 5em; grid-template-rows: auto auto; }
+	select#unitType { grid-row: 1/3; }
+}
+</style>
+</head>
+<body onload="initLists();">
+<div id="gridContainer">
+<select id="unitType" onchange="changeUnitType(); calculate();"></select>
+<input type="number" id="a" onchange="calculate(this);" onkeyup="calculate(this);" onpaste="calculate(this);" />
+<select id="aUnit" onchange="calculate();"></select>
+<input type="number" id="b" onchange="calculate(this);" onkeyup="calculate(this);" onpaste="calculate(this);" />
+<select id="bUnit" onchange="calculate();"></select>
+</div>
+</body>
+</html>
