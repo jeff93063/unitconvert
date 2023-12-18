@@ -1,0 +1,21 @@
+{
+  "name": "UnitConvert",
+  "short_name": "UnitConvert",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f88f00",
+  "theme_color": "#f88f00",
+  "orientation": "any",
+  "icons": [
+        {
+            "src": "/unitconvert/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/unitconvert/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+  ]
+}
