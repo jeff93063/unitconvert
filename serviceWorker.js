@@ -1,7 +1,7 @@
-const staticCacheName = "units-static-v1";
+const staticCacheName = "units-static-v2";
 const assets = [
-	"/units/",
-	"/units/index.html"
+	"/unitconvert/",
+	"/unitconvert/index.html"
 ];
 
 self.addEventListener("install", installEvent => {
