@@ -317,7 +317,7 @@ function changeUnitType(){
 	select { background-color: #000000; color: #ffffff; }
 }
 @media (prefers-color-scheme: light) {
-	body { background-color: #f0f0f0; }
+	body { background-color: #e0e0e0; }
 	input { background-color: #ffffff; color: #000000; }
 	select  { background-color: #ffffff; color: #000000; }
 }
@@ -331,8 +331,8 @@ div#gridContainer {
 	right:0px;
 	transform: translateY(-50%);
 }
-input { width:100%; font-family:"cascadia code", "cascadia mono", "courier new", courier, monospace; }
-select { width:100%; }
+input { width:calc(100% - 0.4rem); font-family:"cascadia code", "cascadia mono", "courier new", courier, monospace; border:0px; border-radius:.2rem; padding:.2rem; }
+select { width:100%; border:0px; border-radius:.2rem; padding:.2rem; }
 @media (orientation: portrait) {
 	* { font-size: 8vw; }
 	div#gridContainer { grid-template-columns: 1fr 5em; grid-template-rows: auto auto auto; }
