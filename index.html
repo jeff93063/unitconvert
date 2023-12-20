@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-
 <link rel="apple-touch-icon" sizes="180x180" href="/unitconvert/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/unitconvert/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/unitconvert/favicon-16x16.png">
@@ -13,7 +11,6 @@
 <meta name="msapplication-config" content="/unitconvert/browserconfig.xml">
 <meta name="theme-color" content="#f88f00">
 <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
-
 
 <script type="text/javascript">
 if ("serviceWorker" in navigator) {
@@ -26,13 +23,14 @@ if ("serviceWorker" in navigator) {
 }
 
 function setCookie(name,value,days) { //https://stackoverflow.com/questions/14573223/set-cookie-and-get-cookie-with-javascript
+	//console.log("cookie name=" + name + " value=" + value + " days=" + days);
 	var expires = "";
 	if (days) {
 		var date = new Date();
 		date.setTime(date.getTime() + (days*24*60*60*1000));
 		expires = "; expires=" + date.toUTCString();
 	}
-	document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+	document.cookie = name + "=" + (value || "")  + expires + "; path=/; SameSite=Strict";
 }
 function getCookie(name) {
 	var nameEQ = name + "=";
@@ -52,16 +50,16 @@ var last = null;
 function $(id) { return document.getElementById(id); }
 var unitTypeData = [
 	{
-		"id": "length",
-		"text": "Length",
-		"defaultA": "in",
-		"defaultB": "mm"
-	},
-	{
 		"id": "temp",
 		"text": "Temperature",
 		"defaultA": "c",
 		"defaultB": "f"
+	},
+	{
+		"id": "length",
+		"text": "Length",
+		"defaultA": "in",
+		"defaultB": "mm"
 	},
 	{
 		"id": "speed",
@@ -167,52 +165,62 @@ var unitdata = [
 	}
 ];
 
+var tempA = "";
+var tempB = "";
+
 function calculate(element) {
-	setCookie("unitType",$("unitType").value,99);
-	setCookie("aUnit",$("aUnit").value,99);
-	setCookie("bUnit",$("bUnit").value,99);
-	if($("a").value || $("b").value){
-		//currently fires onchange a second time when it updates the other input
-		if(element){
-			last = element.id;
-		}
-		else{
-			last = "a";
-		}
-		if(last == "a"){
-			$("b").value = "";
-		}
-		else if(last == "b"){
-			$("a").value = "";
-		}
-		if(!isNaN(parseFloat($(last).value))){
-			let thisType = $("unitType").value;
-			var oldUnit = "";
-			var newUnit = "";
+	//console.log("tempA=" + tempA + ", tempB=" + tempB + ", $a.value=" + $("a").value + ", $b.value=" + $("b").value);
+	if($("a").value != tempA || $("b").value != tempB) { //prevents recalculating when you unfocus after typing in the input
+		//console.log("calculate");
+		setCookie("unitType",$("unitType").value,99);
+		setCookie("aUnit",$("aUnit").value,99);
+		setCookie("bUnit",$("bUnit").value,99);
+		if($("a").value || $("b").value){
+			if(element){
+				last = element.id;
+			}
+			else{
+				last = "a";
+			}
 			if(last == "a"){
-				//alert($("aUnit").value);
-				oldUnit = $("aUnit").value;
-				newUnit = $("bUnit").value;
+				$("b").value = "";
 			}
 			else if(last == "b"){
-				oldUnit = $("bUnit").value;
-				newUnit = $("aUnit").value;
+				$("a").value = "";
 			}
-			let oldUnitObject = unitdata.find(unitdata => unitdata.type === thisType && unitdata.id === oldUnit);
-			let newUnitObject = unitdata.find(unitdata => unitdata.type === thisType && unitdata.id === newUnit);
-			let normalizedValue = (parseFloat($(last).value) + oldUnitObject.preoffset) * oldUnitObject.multiplier + oldUnitObject.postoffset;
-			let convertedValue = (normalizedValue - newUnitObject.postoffset) / newUnitObject.multiplier - newUnitObject.preoffset;
-			if(last == "a"){
-				//alert(convertedValue);
-				$("b").value = matchSigFigs($(last).value,convertedValue);
-				setCookie("b",matchSigFigs($(last).value,convertedValue),99);
+			if(!isNaN(parseFloat($(last).value))){
+				let thisType = $("unitType").value;
+				var oldUnit = "";
+				var newUnit = "";
+				if(last == "a"){
+					//alert($("aUnit").value);
+					oldUnit = $("aUnit").value;
+					newUnit = $("bUnit").value;
+				}
+				else if(last == "b"){
+					oldUnit = $("bUnit").value;
+					newUnit = $("aUnit").value;
+				}
+				let oldUnitObject = unitdata.find(unitdata => unitdata.type === thisType && unitdata.id === oldUnit);
+				let newUnitObject = unitdata.find(unitdata => unitdata.type === thisType && unitdata.id === newUnit);
+				let normalizedValue = (parseFloat($(last).value) + oldUnitObject.preoffset) * oldUnitObject.multiplier + oldUnitObject.postoffset;
+				let convertedValue = (normalizedValue - newUnitObject.postoffset) / newUnitObject.multiplier - newUnitObject.preoffset;
+				if(last == "a"){
+					//alert(convertedValue);
+					$("b").value = matchSigFigs($(last).value,convertedValue);
+					setCookie("b",$("b").value,99);
+					setCookie("a",$(last).value,99);
+				}
+				else if(last == "b"){
+					$("a").value = matchSigFigs($(last).value,convertedValue);
+					setCookie("a",$("a").value,99);
+					setCookie("b",$(last).value,99);
+				}
+				//alert(document.getElementById(last).value);
 			}
-			else if(last == "b"){
-				$("a").value = matchSigFigs($(last).value,convertedValue);
-				setCookie("a",matchSigFigs($(last).value,convertedValue),99);
-			}
-			//alert(document.getElementById(last).value);
 		}
+		tempA = $("a").value;
+		tempB = $("b").value;
 	}
 }
 //alert(matchSigFigs("17.98","01.00050"));
@@ -311,6 +319,10 @@ function changeUnitType(){
 }
 </script>
 <style type="text/css">
+body { background-color: #606060; }
+input { background-color: #000000; color: #ffffff; }
+select { background-color: #000000; color: #ffffff; }
+/*
 @media (prefers-color-scheme: dark) {
 	body { background-color: #606060; }
 	input { background-color: #000000; color: #ffffff; }
@@ -321,6 +333,7 @@ function changeUnitType(){
 	input { background-color: #ffffff; color: #000000; }
 	select  { background-color: #ffffff; color: #000000; }
 }
+*/
 div#gridContainer {
 	display:grid;
 	gap: .5rem;
