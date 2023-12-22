@@ -152,10 +152,12 @@ var unitdata = [
 
 var tempA = "";
 var tempB = "";
+var tempUnitA = "";
+var tempUnitB = "";
 
 function calculate(element) {
 	//console.log("tempA=" + tempA + ", tempB=" + tempB + ", $a.value=" + $("a").value + ", $b.value=" + $("b").value);
-	if($("a").value != tempA || $("b").value != tempB) { //prevents recalculating when you unfocus after typing in the input
+	if($("a").value != tempA || $("b").value != tempB || $("aUnit").value != tempUnitA || $("bUnit").value != tempUnitB) { //prevents recalculating when you unfocus after typing in the input
 		//console.log("calculate");
 		setCookie("unitType",$("unitType").value,99);
 		setCookie("aUnit",$("aUnit").value,99);
@@ -192,12 +194,12 @@ function calculate(element) {
 				let convertedValue = (normalizedValue - newUnitObject.postoffset) / newUnitObject.multiplier - newUnitObject.preoffset;
 				if(last == "a"){
 					//alert(convertedValue);
-					$("b").value = matchSigFigs($(last).value,convertedValue);
+					$("b").value = matchSigFigs($(last).value,convertedValue+"");
 					setCookie("b",$("b").value,99);
 					setCookie("a",$(last).value,99);
 				}
 				else if(last == "b"){
-					$("a").value = matchSigFigs($(last).value,convertedValue);
+					$("a").value = matchSigFigs($(last).value,convertedValue+"");
 					setCookie("a",$("a").value,99);
 					setCookie("b",$(last).value,99);
 				}
@@ -206,32 +208,53 @@ function calculate(element) {
 		}
 		tempA = $("a").value;
 		tempB = $("b").value;
+		tempUnitA = $("aUnit").value;
+		tempUnitB = $("bUnit").value;
 	}
 }
-//alert(matchSigFigs("17.98","01.00050"));
+//console.log(matchSigFigs("17.98","01.00050"));
 function matchSigFigs(from,to) {
+	//console.log("from=" + from + ", to=" + to);
 	splitNum = from.split(".");
 	//alert(splitNum[0] + " | " + splitNum[1]);
 	before = parseInt(splitNum[0]).toString();
-	if(before == 0){
-		ints = 0;
-		after = parseInt(splitNum[1]).toString();
+	if(splitNum.length > 1){
+		after = splitNum[1];
 		decimals = after.length;
 	}
-	else {
-		ints = before.length;
-		if(splitNum[1]){
-			decimals = splitNum[1].length;
-		}
-		else {
-			decimals = 0;
-		}
+	else{
+		after = 0;
+		decimals = 0;
 	}
+	if(before == 0){
+		ints = 0;
+		//after = parseInt(splitNum[1]).toString();
+	}
+	else {
+		ints = before.replace(/\D/g,'').length; //replace removes a negative sign or anything else non-digit
+	}
+	
+	splitTo = to.split(".");
+	toBefore = parseInt(splitTo[0]).toString();
+	if(splitTo.length > 1){
+		toAfter = parseInt(splitTo[1]).toString();
+	}
+	else{
+		toAfter = 0;
+	}
+	
 	sigFigs = ints+decimals;
-	if(sigFigs < 3) sigFigs = 3;
+	//console.log("sigFigs=" + sigFigs);
+	//console.log("toAfter=" + toAfter);
+	if(sigFigs < 3) { sigFigs = 3} ;
+	
 	// add some logic that if there's nothing after the decimal, don't include the decimal
-	// also a negative sign is counted as a sigfig
-	return parseFloat(parseFloat(to).toPrecision(sigFigs));
+	if(to == "0"){
+		return "0";
+	}
+	else{
+		return parseFloat(to).toPrecision(sigFigs);
+	}
 }
 
 function initLists() {
