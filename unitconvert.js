@@ -246,14 +246,13 @@ function matchSigFigs(from,to) {
 	sigFigs = ints+decimals;
 	//console.log("sigFigs=" + sigFigs);
 	//console.log("toAfter=" + toAfter);
-	if(sigFigs < 3) { sigFigs = 3} ;
-	
-	// add some logic that if there's nothing after the decimal, don't include the decimal
+	if(sigFigs < 3) { sigFigs = 3 } ;
 	if(to == "0"){
 		return "0";
 	}
 	else{
-		return parseFloat(to).toPrecision(sigFigs);
+		//issue: 11.1C gives 52F instead of 52.0
+		return parseFloat(parseFloat(to).toPrecision(sigFigs));
 	}
 }
 
