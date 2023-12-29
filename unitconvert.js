@@ -86,7 +86,7 @@ var unitdata = [
 	},
 	{
 		"id": "c",
-		"text": "°C",
+		"text": "&#176;C",
 		"type": "temp",
 		"preoffset": 0,
 		"multiplier": 1,
@@ -94,7 +94,7 @@ var unitdata = [
 	},
 	{
 		"id": "f",
-		"text": "°F",
+		"text": "&#176;F",
 		"type": "temp",
 		"preoffset": -32,
 		"multiplier": 5/9,
