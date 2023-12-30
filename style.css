@@ -7,8 +7,34 @@ div#gridContainer {
 	right:0px;
 	transform: translateY(-50%);
 }
-input { box-sizing: border-box; /*fixes the problem where the 100% width with padding overlaps the container*/ min-width:5rem; background-color: #000000; color: #ffffff; width:100%; font-family:"cascadia code", "cascadia mono", "courier new", courier, monospace; border:0px; border-radius:.5rem; padding:.5rem; }
-select { min-width:5rem; background-color: #000000; color: #ffffff; width:100%; border:0px; border-radius:.5rem; padding:.5rem; }
+input {
+	appearance:unset;
+	box-sizing: border-box; /*fixes the problem where the 100% width with padding overlaps the container*/
+	min-width:5rem;
+	background-color: #000000;
+	color: #ffffff;
+	width:100%;
+	font-family:"cascadia code", "cascadia mono", "courier new", courier, monospace;
+	border:0px;
+	border-radius:.5rem;
+	padding:.5rem;
+}
+select {
+	background-color:#000000;
+	color:#ffffff;
+	min-width:5rem;
+	width:100%;
+	border:0px;
+	border-radius:.5rem;
+	padding:.5rem;
+	/* fixes problem where neutralinojs shows SELECT elements with a native-looking overlay and ignores css background color */
+	appearance:unset;
+	padding-right:1rem;
+	background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>"); 
+	background-repeat: no-repeat;
+	background-position-x: 100%;
+	background-position-y: 50%;
+}
 @media (orientation: portrait) {
 	input { font-size: 8vw; }
 	div#gridContainer { display:grid; gap:.5rem; grid-template-columns: auto auto; grid-template-rows: auto auto auto; }
