@@ -69,6 +69,14 @@ var unitdata = [
 		"postoffset": 0
 	},
 	{
+		"id": "ft",
+		"text": "ft",
+		"type": "length",
+		"preoffset": 0,
+		"multiplier": 0.3048,
+		"postoffset": 0
+	},
+	{
 		"id": "mm",
 		"text": "mm",
 		"type": "length",
@@ -82,6 +90,22 @@ var unitdata = [
 		"type": "length",
 		"preoffset": 0,
 		"multiplier": 1,
+		"postoffset": 0
+	},
+	{
+		"id": "km",
+		"text": "km",
+		"type": "length",
+		"preoffset": 0,
+		"multiplier": 1000,
+		"postoffset": 0
+	},
+	{
+		"id": "mi",
+		"text": "mi",
+		"type": "length",
+		"preoffset": 0,
+		"multiplier": 1609.344,
 		"postoffset": 0
 	},
 	{
@@ -133,11 +157,27 @@ var unitdata = [
 		"postoffset": 0
 	},
 	{
+		"id": "ft/s",
+		"text": "ft/s",
+		"type": "speed",
+		"preoffset": 0,
+		"multiplier": 0.3048,
+		"postoffset": 0
+	},
+	{
 		"id": "w",
 		"text": "Watt",
 		"type": "power",
 		"preoffset": 0,
 		"multiplier": 1,
+		"postoffset": 0
+	},
+	{
+		"id": "kw",
+		"text": "kW",
+		"type": "power",
+		"preoffset": 0,
+		"multiplier": 1000,
 		"postoffset": 0
 	},
 	{
@@ -298,6 +338,8 @@ function initLists() {
 			}
 		}
 	}
+	$("a").focus();
+	$("a").setSelectionRange($("a").value.length,$("a").value.length);
 }
 
 function changeUnitType(){
