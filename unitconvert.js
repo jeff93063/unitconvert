@@ -253,7 +253,46 @@ function calculate(element) {
 	}
 }
 //console.log(matchSigFigs("17.98","01.00050"));
-function matchSigFigs(from,to) {
+
+//NEW ONE BASED ON JSFIDDLE
+function matchSigFigs(from,to){
+	//console.log("from=" + from + ", to=" + to);
+	if(from==0 && to==0){
+		return("0");
+	}
+	else{
+		from = from.replace(/\./,"");
+		var firstNonZero = from.search(/[1-9]/);
+		//var decimal = from.search(/\./);
+		var lastDigit = from.search(/\d$/);
+		var sigFigs = lastDigit - firstNonZero + 1; //not technically sigfigs when this applies to integers with trailing zeros
+		if(sigFigs < 3){ sigFigs = 3; }
+		//console.log("sigFigs=" + sigFigs);
+		var toReturn = parseFloat(to).toPrecision(sigFigs);
+		if(toReturn.indexOf("e") > -1){
+			exp = parseInt(toReturn.substr(toReturn.indexOf("e") + 1));
+			//console.log("exp=" + exp);
+			var toFirstNonZero = to.search(/[1-9]/);
+			var toLastDigit = to.search(/\d$/);
+			var toDecimal = to.search(/\./);
+			var fixedPlaces = null;
+			if(toDecimal == -1){
+				fixedPlaces = 0;
+			}
+			else{
+				fixedPlaces = toFirstNonZero + sigFigs - toDecimal - 1; //can be negative
+				if(fixedPlaces < 0){
+					fixedPlaces = 0;
+				}
+			}
+			//console.log("fixedPlaces=" + fixedPlaces);
+			toReturn = parseFloat(to).toFixed(fixedPlaces);
+		}
+		return(toReturn);
+	}
+}
+
+function OLDmatchSigFigs(from,to) {
 	//console.log("from=" + from + ", to=" + to);
 	splitNum = from.split(".");
 	//alert(splitNum[0] + " | " + splitNum[1]);

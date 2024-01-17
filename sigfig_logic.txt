@@ -1,0 +1,21 @@
+if source value is zero
+	if destination value is zero
+		just display zero
+	if destination value is non-zero * ONLY FOR TEMP
+		show 3 sigfigs
+if source has a decimal
+	if source absolute value is < 1
+		sigfigs start at first non-zero after the decimal
+		sigfigs end at end of string
+	if source absolute value is > 1
+		sigfigs start at first non-zero before the decimal
+		sigfigs end at end of string
+if source has no decimal
+	sigfigs start at first non-zero
+	if destination has a decimal
+		source sigfigs end at last non-zero
+	if destination has no decimal
+		destination sigfigs are "at least" all available integers
+
+need to know
+	
