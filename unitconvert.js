@@ -1,3 +1,6 @@
+//enable for cordova build
+//screen.orientation.lock('portrait');
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function() {
 	navigator.serviceWorker
@@ -31,8 +34,10 @@ function eraseCookie(name) {
 	document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 }
 
-var last = null;
 function $(id) { return document.getElementById(id); }
+var last = null;
+var disableAutoFocus = false;
+var focused = [];
 var unitTypeData = [
 	{
 		"id": "temp",
@@ -206,7 +211,7 @@ function calculate(element) {
 			if(element){
 				last = element.id;
 			}
-			else{
+			else if(last===null){
 				last = "a";
 			}
 			if(last == "a"){
@@ -215,7 +220,8 @@ function calculate(element) {
 			else if(last == "b"){
 				$("a").value = "";
 			}
-			if(!isNaN(parseFloat($(last).value))){
+			if(!isNaN($(last).value) && !isNaN(parseFloat($(last).value))){
+				//console.log(last + "isn't NaN");
 				let thisType = $("unitType").value;
 				var oldUnit = "";
 				var newUnit = "";
@@ -252,9 +258,7 @@ function calculate(element) {
 		tempUnitB = $("bUnit").value;
 	}
 }
-//console.log(matchSigFigs("17.98","01.00050"));
 
-//NEW ONE BASED ON JSFIDDLE
 function matchSigFigs(from,to){
 	//console.log("from=" + from + ", to=" + to);
 	if(from==0 && to==0){
@@ -289,49 +293,6 @@ function matchSigFigs(from,to){
 			toReturn = parseFloat(to).toFixed(fixedPlaces);
 		}
 		return(toReturn);
-	}
-}
-
-function OLDmatchSigFigs(from,to) {
-	//console.log("from=" + from + ", to=" + to);
-	splitNum = from.split(".");
-	//alert(splitNum[0] + " | " + splitNum[1]);
-	before = parseInt(splitNum[0]).toString();
-	if(splitNum.length > 1){
-		after = splitNum[1];
-		decimals = after.length;
-	}
-	else{
-		after = 0;
-		decimals = 0;
-	}
-	if(before == 0){
-		ints = 0;
-		//after = parseInt(splitNum[1]).toString();
-	}
-	else {
-		ints = before.replace(/\D/g,'').length; //replace removes a negative sign or anything else non-digit
-	}
-	
-	splitTo = to.split(".");
-	toBefore = parseInt(splitTo[0]).toString();
-	if(splitTo.length > 1){
-		toAfter = parseInt(splitTo[1]).toString();
-	}
-	else{
-		toAfter = 0;
-	}
-	
-	sigFigs = ints+decimals;
-	//console.log("sigFigs=" + sigFigs);
-	//console.log("toAfter=" + toAfter);
-	if(sigFigs < 3) { sigFigs = 3 } ;
-	if(to == "0"){
-		return "0";
-	}
-	else{
-		//issue: 11.1C gives 52F instead of 52.0
-		return parseFloat(parseFloat(to).toPrecision(sigFigs));
 	}
 }
 
@@ -403,5 +364,60 @@ function changeUnitType(){
 			opt2.selected = true;
 		}
 		$("bUnit").appendChild(opt2);
+	}
+}
+
+function typeChar(buttonElement){
+	//console.log("focused id=" + focused[0].id);
+	preText = focused[0].value;
+	//console.log("preText=" + preText);
+	focused[0].value = preText.substring(0,focused[1]) + buttonElement.innerText + preText.substring(focused[1],preText.length);
+	//console.log("focused[0].value=" + focused[0].value);
+	calculate(focused[0]);
+	focused[1] += 1;
+	disableAutoFocus = true;
+	focused[0].focus();
+	focused[0].setSelectionRange(focused[1],focused[1]);
+	disableAutoFocus = false;
+	//console.log(focused[0].id + "," + focused[1]);
+}
+function backspace(){
+	preText = focused[0].value;
+	focused[0].value = preText.substring(0,focused[1]-1) + preText.substring(focused[1],preText.length);
+	calculate(focused[0]);
+	if(focused[1] > 0){
+		focused[1] -= 1;
+	}
+	disableAutoFocus = true;
+	focused[0].focus();
+	focused[0].setSelectionRange(focused[1],focused[1]);
+	disableAutoFocus = false;
+}
+function toggleNegative(){
+	preText = focused[0].value;
+	var postText = "";
+	if(parseInt(focused[0].value) < 0){
+		postText = preText.replace("-","");
+		focused[1] -= 1;
+	}
+	else {
+		postText = "-" + preText;
+		focused[1] += 1;
+	}
+	focused[0].value = postText;
+	calculate(focused[0]);
+	disableAutoFocus = true;
+	focused[0].focus();
+	focused[0].setSelectionRange(focused[1],focused[1]);
+	disableAutoFocus = false;
+}
+
+function checkFocus(inputElement){
+	if(!disableAutoFocus){
+		focused[0] = inputElement;
+		focused[1] = inputElement.selectionStart;
+		last = focused[0].id;
+		//console.log(focused[0].id + "," + focused[1]);
+		//inputElement.setSelectionRange(focused[1],focused[1]);
 	}
 }

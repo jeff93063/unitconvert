@@ -19,12 +19,33 @@
 
 </head>
 <body onload="initLists();">
-<div id="gridContainer">
-<select id="unitType" onchange="changeUnitType(); calculate();"></select>
-<input inputmode="decimal" id="a" onchange="calculate(this);" onkeyup="calculate(this);" onpaste="calculate(this);" />
-<select id="aUnit" onchange="calculate();"></select>
-<input inputmode="decimal" id="b" onchange="calculate(this);" onkeyup="calculate(this);" onpaste="calculate(this);" />
-<select id="bUnit" onchange="calculate();"></select>
+<div id="overallContainer">
+	<div id="gridContainer">
+		<select id="unitType" onchange="changeUnitType(); calculate();"></select>
+		<input inputmode="none" type="number" id="a" onchange="checkFocus(this); calculate(this);" onkeyup="checkFocus(this); calculate(this);" onpaste="checkFocus(this); calculate(this);" onfocus="checkFocus(this);" onclick="checkFocus(this);" />
+		<select id="aUnit" onchange="calculate();"></select>
+		<input inputmode="none" type="number" id="b" onchange="checkFocus(this); calculate(this);" onkeyup="checkFocus(this); calculate(this);" onpaste="checkFocus(this); calculate(this);" onfocus="checkFocus(this);" onclick="checkFocus(this);" />
+		<select id="bUnit" onchange="calculate();"></select>
+	</div>
+	<div id="numpad">
+		<button onclick="typeChar(this);">1</button>
+		<button onclick="typeChar(this);">2</button>
+		<button onclick="typeChar(this);">3</button>
+		<button onclick="backspace();">⌫</button>
+		<button onclick="typeChar(this);">4</button>
+		<button onclick="typeChar(this);">5</button>
+		<button onclick="typeChar(this);">6</button>
+		<button class="span2row" onclick="toggleNegative();">&mdash;</button>
+		<button onclick="typeChar(this);">7</button>
+		<button onclick="typeChar(this);">8</button>
+		<button onclick="typeChar(this);">9</button>
+		<button class="span2col" onclick="typeChar(this);">0</button>
+		<button class="span2col" onclick="typeChar(this);">.</button>
+	</div>
 </div>
 </body>
+<!-- NeutralinoJS only -->
+<!--<script src="js/neutralino.js"></script>-->
+<!--<script src="js/main.js"></script>-->
+<!-- ==================== -->
 </html>
