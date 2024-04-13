@@ -1,4 +1,4 @@
-const staticCacheName = "units-static-v11";
+const staticCacheName = "units-static-v12";
 const assets = [
 	"/unitconvert/",
 	"/unitconvert/index.html",

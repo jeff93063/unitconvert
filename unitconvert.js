@@ -1,6 +1,7 @@
 //enable for cordova build
 //screen.orientation.lock('portrait');
 
+//enable for PWA
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function() {
 	navigator.serviceWorker
